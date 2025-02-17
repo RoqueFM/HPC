@@ -5,7 +5,7 @@ make nosimd || exit 1
 PROGRAM="taskset -c 0 ./main_nosimd"
 
 # Iteration range
-N_SEQ=$(seq 3 10)
+N_SEQ=$(seq 3 11)
 
 N_=""
 for N in $N_SEQ; do
