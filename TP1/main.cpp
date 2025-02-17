@@ -83,8 +83,8 @@ double kernel__matrix_sum_rowwise(std::size_t N, const double *i_A)
 		 (20 21 22))	(6 7 8))	 (2 5 8))
 		 				M + i*N + j		M + i + j*N
 	*/
-	for(int i = 0; i<N; i++)
-		for(int j = 0; j<N; j++)
+	for(std::size_t i = 0; i<N; i++)
+		for(std::size_t j = 0; j<N; j++)
 			acc += *(i_A + i*N + j);
 	return acc;
 }
@@ -96,8 +96,8 @@ double kernel__matrix_sum_colwise(std::size_t N, const double *i_A)
 	 * STUDENT ASSIGNMENT
 	 */
 	double acc = 0;
-	for(int i = 0; i<N; i++)
-		for(int j = 0; j<N; j++)
+	for(std::size_t i = 0; i<N; i++)
+		for(std::size_t j = 0; j<N; j++)
 			acc += *(i_A + i + j*N);
 	return acc;
 }
@@ -111,9 +111,9 @@ void kernel__matrix_matrix_mul_simple_ijk(std::size_t N, const double *i_A, cons
 	/*
 	 * STUDENT ASSIGNMENT
 	 */
-	for(int i = 0; i<N; i++)
-		for(int j = 0; j<N; j++)
-			for(int k = 0; k<N; k++)
+	for(std::size_t i = 0; i<N; i++)
+		for(std::size_t j = 0; j<N; j++)
+			for(std::size_t k = 0; k<N; k++)
 				o_C[i*N + j] += i_A[i*N + k]*i_B[k*N + j];
 
 	/*
@@ -136,9 +136,9 @@ void kernel__matrix_matrix_mul_simple_jik(std::size_t N, const double *i_A, cons
 	/*
 	 * STUDENT ASSIGNMENT
 	 */
-	for(int j = 0; j<N; j++)
-		for(int i = 0; i<N; i++)
-			for(int k = 0; k<N; k++)
+	for(std::size_t j = 0; j<N; j++)
+		for(std::size_t i = 0; i<N; i++)
+			for(std::size_t k = 0; k<N; k++)
 				o_C[i*N + j] += i_A[i*N + k]*i_B[k*N + j];
 }
 
@@ -151,9 +151,9 @@ void kernel__matrix_matrix_mul_simple_ikj(std::size_t N, const double *i_A, cons
 	/*
 	 * STUDENT ASSIGNMENT
 	 */
-	for(int i = 0; i<N; i++)
-		for(int k = 0; k<N; k++)
-			for(int j = 0; j<N; j++)
+	for(std::size_t i = 0; i<N; i++)
+		for(std::size_t k = 0; k<N; k++)
+			for(std::size_t j = 0; j<N; j++)
 				o_C[i*N + j] += i_A[i*N + k]*i_B[k*N + j];
 }
 
@@ -166,9 +166,9 @@ void kernel__matrix_matrix_mul_simple_jki(std::size_t N, const double *i_A, cons
 	/*
 	 * STUDENT ASSIGNMENT
 	 */
-	for(int j = 0; j<N; j++)
-		for(int k = 0; k<N; k++)
-			for(int i = 0; i<N; i++)
+	for(std::size_t j = 0; j<N; j++)
+		for(std::size_t k = 0; k<N; k++)
+			for(std::size_t i = 0; i<N; i++)
 				o_C[i*N + j] += i_A[i*N + k]*i_B[k*N + j];
 }
 
@@ -181,9 +181,9 @@ void kernel__matrix_matrix_mul_simple_kij(std::size_t N, const double *i_A, cons
 	/*
 	 * STUDENT ASSIGNMENT
 	 */
-	for(int k = 0; k<N; k++)
-		for(int i = 0; i<N; i++)
-			for(int j = 0; j<N; j++)
+	for(std::size_t k = 0; k<N; k++)
+		for(std::size_t i = 0; i<N; i++)
+			for(std::size_t j = 0; j<N; j++)
 				o_C[i*N + j] += i_A[i*N + k]*i_B[k*N + j];
 }
 
@@ -196,9 +196,9 @@ void kernel__matrix_matrix_mul_simple_kji(std::size_t N, const double *i_A, cons
 	/*
 	 * STUDENT ASSIGNMENT
 	 */
-	for(int k = 0; k<N; k++)
-		for(int j = 0; j<N; j++)
-			for(int i = 0; i<N; i++)
+	for(std::size_t k = 0; k<N; k++)
+		for(std::size_t j = 0; j<N; j++)
+			for(std::size_t i = 0; i<N; i++)
 				o_C[i*N + j] += i_A[i*N + k]*i_B[k*N + j];
 }
 
@@ -211,9 +211,9 @@ void kernel__matrix_matrix_mul_restricted_ikj(std::size_t N, const double * __re
 	/*
 	 * STUDENT ASSIGNMENT
 	 */
-	for(int i = 0; i<N; i++)
-		for(int k = 0; k<N; k++)
-			for(int j = 0; j<N; j++)
+	for(std::size_t i = 0; i<N; i++)
+		for(std::size_t k = 0; k<N; k++)
+			for(std::size_t j = 0; j<N; j++)
 				o_C[i*N + j] += i_A[i*N + k]*i_B[k*N + j];
 }
 
@@ -227,10 +227,19 @@ void kernel__matrix_matrix_mul_var_blocked_ikj(std::size_t N, const double * __r
 	/*
 	 * STUDENT ASSIGNMENT
 	 */
-	for(int i = 0; i<N; i++)
-		for(int k = 0; k<N; k++)
-			for(int j = 0; j<N; j++)
-				o_C[i*N + j] += i_A[i*N + k]*i_B[k*N + j];
+    for (std::size_t ii = 0; ii < N; ii += cache_blocking_size) {
+        for (std::size_t kk = 0; kk < N; kk += cache_blocking_size) {
+            for (std::size_t i = ii; i < std::min(ii + cache_blocking_size, N); ++i) {
+                for (std::size_t k = kk; k < std::min(kk + cache_blocking_size, N); ++k) {
+                    double A_ik = i_A[i * N + k];
+
+                    for (std::size_t j = 0; j < N; ++j) { 
+                        o_C[i * N + j] += A_ik * i_B[k * N + j];  
+                    }
+                }
+            }
+        }
+    }
 }
 
 
@@ -243,9 +252,9 @@ void kernel__matrix_matrix_mul_blocked_ikj(std::size_t N, const double * __restr
 	/*
 	 * STUDENT ASSIGNMENT
 	 */
-	for(int i = 0; i<N; i++)
-		for(int k = 0; k<N; k++)
-			for(int j = 0; j<N; j++)
+	for(std::size_t i = 0; i<N; i++)
+		for(std::size_t k = 0; k<N; k++)
+			for(std::size_t j = 0; j<N; j++)
 				o_C[i*N + j] += i_A[i*N + k]*i_B[k*N + j];
 }
 
@@ -258,9 +267,9 @@ void kernel__matrix_matrix_mul_simd_ikj(std::size_t N, const double * __restrict
 	/*
 	 * STUDENT ASSIGNMENT
 	 */
-	for(int i = 0; i<N; i++)
-		for(int k = 0; k<N; k++)
-			for(int j = 0; j<N; j++)
+	for(std::size_t i = 0; i<N; i++)
+		for(std::size_t k = 0; k<N; k++)
+			for(std::size_t j = 0; j<N; j++)
 				o_C[i*N + j] += i_A[i*N + k]*i_B[k*N + j];
 }
 
@@ -272,9 +281,9 @@ void kernel__matrix_matrix_mul_openmp_ikj(std::size_t N, const double * __restri
 	/*
 	 * STUDENT ASSIGNMENT
 	 */
-	for(int i = 0; i<N; i++)
-		for(int k = 0; k<N; k++)
-			for(int j = 0; j<N; j++)
+	for(std::size_t i = 0; i<N; i++)
+		for(std::size_t k = 0; k<N; k++)
+			for(std::size_t j = 0; j<N; j++)
 				o_C[i*N + j] += i_A[i*N + k]*i_B[k*N + j];
 }
 
@@ -286,9 +295,9 @@ void kernel__matrix_matrix_mul_openmp_ikj(std::size_t N, const double * __restri
  */
 void kernel__matrix_matrix_mul_opti_ikj(std::size_t N, const double * __restrict__ i_A, const double * __restrict__ i_B, double * __restrict__ o_C)
 {
-	for(int i = 0; i<N; i++)
-		for(int k = 0; k<N; k++)
-			for(int j = 0; j<N; j++)
+	for(std::size_t i = 0; i<N; i++)
+		for(std::size_t k = 0; k<N; k++)
+			for(std::size_t j = 0; j<N; j++)
 				o_C[i*N + j] += i_A[i*N + k]*i_B[k*N + j];
 }
 
@@ -302,9 +311,9 @@ void kernel__matrix_matrix_mul_mkl_ikj(std::size_t N, const double * __restrict_
 	/*
 	 * STUDENT ASSIGNMENT
 	 */
-	for(int i = 0; i<N; i++)
-		for(int k = 0; k<N; k++)
-			for(int j = 0; j<N; j++)
+	for(std::size_t i = 0; i<N; i++)
+		for(std::size_t k = 0; k<N; k++)
+			for(std::size_t j = 0; j<N; j++)
 				o_C[i*N + j] += i_A[i*N + k]*i_B[k*N + j];
 }
 
