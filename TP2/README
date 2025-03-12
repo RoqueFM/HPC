@@ -1,0 +1,41 @@
+
+
+README		# This file
+
+main.cpp	# main and only cpp file
+
+lib		# Some helper libraries
+
+Makefile	# Makefile
+
+plot_csv.py	# Python plotting routine, see below
+
+benchmark_base.sh	# script used by run_* benchmarks
+run_01_matrix_norm_novec.sh	# Benchmark helpers
+run_02a_mmul_simple_ijk.sh
+run_02b_mmul_simple_all.sh
+run_03_mmul_restrict.sh
+run_04_mmul_blocked.sh
+run_05_mmul_simd.sh
+run_06_mmul_openmp.sh
+run_07_mmul_avx2.sh
+run_08_mmul_opti_large.sh
+run_08_mmul_opti.sh
+run_09_mmul_mkl.sh
+run_all.sh
+
+run_valgrind_memcheck.sh	# Valgrind memory checker
+
+
+====================
+plot_csv.py
+====================
+The run_* scripts output some csv files.
+
+They can be plotted by using
+	./plot_csv.py output_file1.csv output_file2.csv
+
+This allows you to also plot different csv outputs together.
+
+Additionally, a PDF is created and is called the same as the first csv file except the file name ending which is replaced by .pdf
+
