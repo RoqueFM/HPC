@@ -16,8 +16,9 @@ for VARIANT in $VARIANT_; do
 	FIRST_N=true
 	for N in $N_; do
 		# Prepare execution
-		CACHE_BLOCKING_SIZE=$(echo "scale=4; sqrt($N)" | bc)
-		EXEC="$PROGRAM $VARIANT $N $CACHE_BLOCKING_SIZE"
+		#CACHE_BLOCKING_SIZE=$(echo "scale=4; sqrt($N)" | bc)
+		#CACHE_BLOCKING_SIZE=4
+		EXEC="$PROGRAM $VARIANT $N"
 
 		if [ ! -z $DEBUG_EXEC ]; then
 			if $DEBUG_EXEC; then

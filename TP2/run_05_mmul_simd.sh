@@ -5,7 +5,7 @@ make simd || exit 1
 PROGRAM="taskset -c 0 ./main_simd"
 
 # Iteration range
-N_SEQ=$(seq 4 10)
+N_SEQ=$(seq 4 12)
 
 N_=""
 for N in $N_SEQ; do

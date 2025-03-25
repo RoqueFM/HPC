@@ -16,6 +16,6 @@ done
 # Variants
 #VARIANT_="22 32 42 24 34 44"
 #VARIANT_="22 32 42"
-VARIANT_="35"
+VARIANT_="22 31 32 33 34 35"
 
 source benchmark_base.sh
