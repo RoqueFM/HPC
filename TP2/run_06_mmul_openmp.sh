@@ -5,7 +5,7 @@ make openmp || exit 1
 PROGRAM="./main_openmp"
 
 # Iteration range
-N_SEQ=$(seq 4 10)
+N_SEQ=$(seq 4 12)
 
 N_=""
 for N in $N_SEQ; do

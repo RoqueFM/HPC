@@ -257,13 +257,21 @@ void kernel__matrix_matrix_mul_blocked_ikj(std::size_t N, const double * __restr
 	/*
 	 * STUDENT ASSIGNMENT
 	 */
+	// const int cache_blocking_size = CACHE_CONST_BLOCKING_SIZE;
+	// for(std::size_t ii = 0; ii < N; ii += cache_blocking_size)
+	// 	for(std::size_t kk = 0; kk < N; kk += cache_blocking_size)
+	// 		for(std::size_t jj = 0; jj < N; jj += cache_blocking_size)
+	// 			for(std::size_t i = ii; i < ii + cache_blocking_size && i < N; i++)
+	// 				for(std::size_t k = kk; k < kk + cache_blocking_size && k < N; k++)
+	// 					for(std::size_t j = jj; j < jj + cache_blocking_size && j < N; j++)
+	// 						o_C[i*N + j] += i_A[i*N + k]*i_B[k*N + j];
 	const int cache_blocking_size = CACHE_CONST_BLOCKING_SIZE;
 	for(std::size_t ii = 0; ii < N; ii += cache_blocking_size)
 		for(std::size_t kk = 0; kk < N; kk += cache_blocking_size)
 			for(std::size_t jj = 0; jj < N; jj += cache_blocking_size)
-				for(std::size_t i = ii; i < ii + cache_blocking_size && i < N; i++)
-					for(std::size_t k = kk; k < kk + cache_blocking_size && k < N; k++)
-						for(std::size_t j = jj; j < jj + cache_blocking_size && j < N; j++)
+				for(std::size_t i = ii; i < ii + cache_blocking_size; i++)
+					for(std::size_t k = kk; k < kk + cache_blocking_size; k++)
+						for(std::size_t j = jj; j < jj + cache_blocking_size; j++)
 							o_C[i*N + j] += i_A[i*N + k]*i_B[k*N + j];
 }
 
@@ -276,7 +284,7 @@ void kernel__matrix_matrix_mul_simd_ikj(std::size_t N, const double * __restrict
 	/*
 	 * STUDENT ASSIGNMENT
 	 */
-	const int cache_blocking_size = CACHE_CONST_BLOCKING_SIZE;
+	const int cache_blocking_size = 512; // As alignment
 	#pragma omp simd aligned(i_A,i_B,o_C:512)
 	for(std::size_t ii = 0; ii < N; ii += cache_blocking_size)
 		for(std::size_t kk = 0; kk < N; kk += cache_blocking_size)
@@ -285,6 +293,13 @@ void kernel__matrix_matrix_mul_simd_ikj(std::size_t N, const double * __restrict
 					for(std::size_t k = kk; k < kk + cache_blocking_size && k < N; k++)
 						for(std::size_t j = jj; j < jj + cache_blocking_size && j < N; j++)
 							o_C[i*N + j] += i_A[i*N + k]*i_B[k*N + j];
+
+
+	// #pragma omp simg aligned(i_A,i_B,o_C:512)
+	// for(std::size_t i = 0; i < N; i++)
+	// 	for(std::size_t k = 0; k < N; k++)
+	// 		for(std::size_t j = 0; j < N; j++)
+	// 			o_C[i*N + j] += i_A[i*N + k]*i_B[k*N + j];
 }
 
 /**
@@ -295,15 +310,34 @@ void kernel__matrix_matrix_mul_openmp_ikj(std::size_t N, const double * __restri
 	/*
 	 * STUDENT ASSIGNMENT
 	 */
-	const int cache_blocking_size = CACHE_CONST_BLOCKING_SIZE;
-	#pragma omp parallel
-	for(std::size_t ii = 0; ii < N; ii += cache_blocking_size)
-		for(std::size_t kk = 0; kk < N; kk += cache_blocking_size)
-			for(std::size_t jj = 0; jj < N; jj += cache_blocking_size)
-				for(std::size_t i = ii; i < ii + cache_blocking_size && i < N; i++)
-					for(std::size_t k = kk; k < kk + cache_blocking_size && k < N; k++)
-						for(std::size_t j = jj; j < jj + cache_blocking_size && j < N; j++)
-							o_C[i*N + j] += i_A[i*N + k]*i_B[k*N + j];
+	// const int cache_blocking_size = CACHE_CONST_BLOCKING_SIZE;
+	// #pragma omp parallel for collapse(2)
+	// for(std::size_t ii = 0; ii < N; ii += cache_blocking_size)
+	// 	for(std::size_t kk = 0; kk < N; kk += cache_blocking_size)
+	// 		for(std::size_t jj = 0; jj < N; jj += cache_blocking_size)
+	// 			for(std::size_t i = ii; i < ii + cache_blocking_size && i < N; i++)
+	// 				for(std::size_t k = kk; k < kk + cache_blocking_size && k < N; k++){
+	// 					#pragma omp simd aligned(i_A,i_B,o_C:512)
+	// 					for(std::size_t j = jj; j < jj + cache_blocking_size && j < N; j++)
+	// 						o_C[i*N + j] += i_A[i*N + k]*i_B[k*N + j];
+	// 				}
+	const int cache_blocking_size = sqrt(N);
+    // Parallelize the outer two loops (over ii and jj), so that each thread
+    // works on a different block of rows and columns in o_C.
+    #pragma omp parallel for collapse(2)
+    for (std::size_t ii = 0; ii < N; ii += cache_blocking_size)
+        for (std::size_t jj = 0; jj < N; jj += cache_blocking_size)
+            for (std::size_t kk = 0; kk < N; kk += cache_blocking_size)
+                for (std::size_t i = ii; i < ((ii+cache_blocking_size) < N ? (ii+cache_blocking_size) : N); i++)
+                    // The inner-most j loop is vectorized using SIMD.
+                    for (std::size_t k = kk; k < ((kk+cache_blocking_size) < N ? (kk+cache_blocking_size) : N); k++)
+                    {
+                        #pragma omp simd aligned(i_A, i_B, o_C: 512)
+                        for (std::size_t j = jj; j < ((jj+cache_blocking_size) < N ? (jj+cache_blocking_size) : N); j++)
+                        {
+                            o_C[i*N + j] += i_A[i*N + k] * i_B[k*N + j];
+                        }
+       				}
 }
 
 
@@ -583,10 +617,11 @@ int main(int argc, char *argv[])
 	B = new double[N*N];
 	C = new double[N*N];
 	*/
+	/*
 	posix_memalign((void**)&A,512,N*N*sizeof(double));
 	posix_memalign((void**)&B,512,N*N*sizeof(double));
 	posix_memalign((void**)&C,512,N*N*sizeof(double));
-
+	*/
 	/**
 	 * Setup particular benchmark
 	 */
@@ -720,10 +755,20 @@ int main(int argc, char *argv[])
 		case MATRIX_MATRIX_MUL_RESTRICTED_IKJ:
 		case MATRIX_MATRIX_MUL_VAR_BLOCKED_IKJ:
 		case MATRIX_MATRIX_MUL_BLOCKED_IKJ:
+			// A = new double[N*N];
+			// B = new double[N*N];
+			// C = new double[N*N];
+			// matrix_setup_A(N, A);
+			// matrix_setup_B(N, B);
+			// matrix_zero_C(N, C);
+			// break;
 		case MATRIX_MATRIX_MUL_SIMD_IKJ:
 		case MATRIX_MATRIX_MUL_OPENMP_IKJ:
 		case MATRIX_MATRIX_MUL_OPTI_IKJ:
 		case MATRIX_MATRIX_MUL_MKL_IKJ:
+			posix_memalign((void**)&A,512,N*N*sizeof(double));
+			posix_memalign((void**)&B,512,N*N*sizeof(double));
+			posix_memalign((void**)&C,512,N*N*sizeof(double));
 			matrix_setup_A(N, A);
 			matrix_setup_B(N, B);
 			matrix_zero_C(N, C);

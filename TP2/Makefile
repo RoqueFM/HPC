@@ -17,12 +17,13 @@ CXXFLAGS_OMP+=-fopenmp
 LDFLAGS_OMP+=-fopenmp
 
 # MKL flags
-#LDFLAGS+=-lmkl_intel_ilp64 -lmkl_core -lm -lc
-#LDFLAGS_NOOMP+=-lmkl_sequential
-#LDFLAGS_OMP+=-lmkl_gnu_thread
+# LDFLAGS+=-lmkl_intel_ilp64 -lmkl_core -lm -lc
+# LDFLAGS_NOOMP+=-lmkl_sequential
+# LDFLAGS_OMP+=-lmkl_gnu_thread
 
 # AVX2
-CXXFLAGS+=-ftree-vectorize -fstrict-aliasing
+CXXFLAGS+=-ftree-vectorize -fstrict-aliasing -O3
+# CXXFLAGS+= -fno-tree-vectorize -fstrict-aliasing 
 
 all: nosimd simd openmp debug
 	@echo "Compiling all targets"
